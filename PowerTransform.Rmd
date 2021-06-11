@@ -1,0 +1,79 @@
+---
+title: "ProblemSet_2"
+author: "Conrad"
+date: "10/13/2020"
+output: html_document
+---
+
+Set up data
+```{r}
+data = read.table("Data.csv", sep = " ", header = T)
+
+AccData <- data[data$success==T,]
+
+summary(AccData$rt) 
+```
+
+
+Visualize
+```{r}
+library(ggplot2)
+library(Hmisc)
+
+ggplot(AccData, aes(x=as.factor(group), y=rt))+ 
+  geom_boxplot()
+  
+ggplot(AccData, aes(x=as.factor(group), y= rt))+ 
+  stat_summary(fun = rt, geom = "bar", position="dodge")+
+  stat_summary(fun.data = mean_cl_normal, geom="errorbar",
+               position = position_dodge(width=0.90), width=0.2)
+```
+```{r}
+(hits.rt <- ggplot(AccData,aes(rt))+geom_histogram(aes(y=..density..)) + stat_function(fun = dnorm, args = list(mean = mean(AccData$rt, na.rm=T), sd = sd(AccData$rt, na.rm=T))))
+```
+
+```{r}
+qqnorm(AccData$rt, pch = 1, frame = FALSE)
+qqline(AccData$rt, col = "steelblue", lwd = 2)
+```
+
+
+Check Assumptions
+```{r}
+#Assumption of normality
+shapiro.test(AccData$rt) #<0.05 = skewed
+
+#Homogeneity of variance
+library(car)
+leveneTest(AccData$rt, as.factor(AccData$group)) # >0.05 = no differences in variance
+bartlett.test(AccData$rt, AccData$group) #more stringent, shows significance 
+#(overall, then, we can expect the deviation to be small)
+```
+
+
+
+Power transform
+```{r}
+library(MASS)
+lambdaList = boxcox(rt~group, data = AccData)
+(lambda = lambdaList$x[which.max(lambdaList$y)])
+```
+
+# Common Box-Cox transformations
+I      Y
+-2    Y^-2 == 1/Y2
+-1    Y^-1 == 1/Y1
+-0.5  Y^-0.5 = 1/sqrt(y)
+0      log(y)
+0.5   Y^0.5 == sqrt(y) 
+1     Y^1 == Y
+2     Y^2 == Y^2
+
+
+Apply appropriate transformation. Graph above shows closest lambda value is -0.05: 
+```{r}
+hist(1/sqrt(AccData$rt))
+```
+Indeed, with the exception of a clear outlier, the distribution is now quite normal. 
+
+
