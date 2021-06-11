@@ -1,6 +1,6 @@
 ---
 title: "Power Transform"
-author: "Conrad"
+author: "Conrado Eiroa-Solans"
 output: html_document
 ---
 
