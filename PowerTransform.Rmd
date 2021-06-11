@@ -1,7 +1,6 @@
 ---
-title: "ProblemSet_2"
+title: "Power Transform"
 author: "Conrad"
-date: "10/13/2020"
 output: html_document
 ---
 
